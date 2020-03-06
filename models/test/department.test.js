@@ -49,8 +49,8 @@ describe('Department', () => {
         }
     });
 
-    after(() => {
-        mongoose.models = {};
-    });
+    // after(() => {
+    //     mongoose.models = {};
+    // });
 
 });
