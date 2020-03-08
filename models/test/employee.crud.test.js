@@ -1,4 +1,5 @@
 const Employee = require('../employee.model');
+const Department = require('../department.model');
 const expect = require('chai').expect;
 const MongoMemoryServer = require('mongodb-memory-server').MongoMemoryServer;
 const mongoose = require('mongoose');
@@ -22,14 +23,18 @@ describe('Employee', () => {
     describe('Reading data', () => {
 
         before(async () => {
+            
+            const testDepOne = new Department({ name: 'Department #1' });
+            await testDepOne.save();
 
+            const testDepTwo = new Department({ name: 'Department #2' });
+            await testDepTwo.save();
            
-            const testEmpOne = new Employee({ firstName: 'John #1', lastName: 'surname #1', department: '1' });
+            const testEmpOne = new Employee({ firstName: 'name #1', lastName: 'surname', department: testDepOne });
             await testEmpOne.save();
 
-            const testEmpTwo = new Employee({ firstName: 'John #2', lastName: 'surname #2', department: '2' });
+            const testEmpTwo = new Employee({ firstName: 'name #2', lastName: 'surname #2', department: testDepTwo });
             await testEmpTwo.save();
-            
         })
 
         it('should return all the data with "find" method', async () => {
@@ -65,10 +70,17 @@ describe('Employee', () => {
     describe('Updating data', () => {
 
         before(async () => {
-            const testEmpOne = new Employee({ firstName: 'name #1', lastName: 'surname', department: '5e5aedb36af09dc4837a5a16' });
+            
+            const testDepOne = new Department({ name: 'Department #1' });
+            await testDepOne.save();
+
+            const testDepTwo = new Department({ name: 'Department #2' });
+            await testDepTwo.save();
+           
+            const testEmpOne = new Employee({ firstName: 'name #1', lastName: 'surname', department: testDepOne });
             await testEmpOne.save();
 
-            const testEmpTwo = new Employee({ firstName: 'name #2', lastName: 'surname #2', department: 'Department #2' });
+            const testEmpTwo = new Employee({ firstName: 'name #2', lastName: 'surname #2', department: testDepTwo });
             await testEmpTwo.save();
         });
 
@@ -79,11 +91,11 @@ describe('Employee', () => {
         });
 
         it('should properly update one document with "save" method', async () => {
-            const employee = await Employee.findOne({ firstName: 'name #1' });
-            employee.firstName = '=name #1=';
+            const employee = await Employee.findOne({ firstName: 'name #2' }).populate('department');
+            employee.firstName = '=name #2=';
             await employee.save();
 
-            const updatedEmployee = await Employee.findOne({ firstName: '=name #1=' });
+            const updatedEmployee = await Employee.findOne({ firstName: '=name #2=' });
             expect(updatedEmployee).to.not.be.null;
         });
 
@@ -101,7 +113,7 @@ describe('Employee', () => {
             expect(employees.length).to.be.equal(2);
         });
 
-        afterEach(async () => {
+        after(async () => {
             await Employee.deleteMany();
         });
 
@@ -110,10 +122,16 @@ describe('Employee', () => {
     describe('Removing data', () => {
 
         before(async () => {
-            const testEmpOne = new Employee({ firstName: 'name #1', lastName: 'surname', department: '5e5aedb36af09dc4837a5a16' });
+            const testDepOne = new Department({ name: 'Department #1' });
+            await testDepOne.save();
+
+            const testDepTwo = new Department({ name: 'Department #2' });
+            await testDepTwo.save();
+           
+            const testEmpOne = new Employee({ firstName: 'name #1', lastName: 'surname', department: testDepOne });
             await testEmpOne.save();
 
-            const testEmpTwo = new Employee({ firstName: 'name #2', lastName: 'surname #2', department: 'Department #2' });
+            const testEmpTwo = new Employee({ firstName: 'name #2', lastName: 'surname #2', department: testDepTwo });
             await testEmpTwo.save();
         });
 
@@ -124,9 +142,9 @@ describe('Employee', () => {
             });
 
             it('should properly remove one document with "remove" method', async () => {
-                const employee = await Employee.findOne({ firstName: 'name #1' });
+                const employee = await Employee.findOne({ firstName: 'name #2' });
                 await employee.remove();
-                const removedEmployee = await Employee.findOne({ firstName: 'name #1' });
+                const removedEmployee = await Employee.findOne({ firstName: 'name #2' });
                 expect(removedEmployee).to.be.null;
             });
 
@@ -136,7 +154,7 @@ describe('Employee', () => {
                 expect(employees.length).to.be.equal(0);
             });
 
-        afterEach(async () => {
+        after(async () => {
             await Employee.deleteMany();
         });
     });
